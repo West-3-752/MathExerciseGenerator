@@ -12,9 +12,11 @@ public class Main{
         ReadWriteTxt readWriteTxt = new ReadWriteTxt();
         Creator creator = new Creator();
         System.out.println("四则运算生成器");
-        System.out.print("请输入生成题目的数量(1~10000)：");
+        //过滤
+        String s = scanner.next();
         int n = scanner.nextInt();
-        System.out.print("请输入题目的数值范围：");
+        //过滤
+        String s1 = scanner.next();
         int r = scanner.nextInt();
         /*生成练习题数组*/
         String[][] exercises = creator.createExercise(n,r);

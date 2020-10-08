@@ -128,6 +128,50 @@ public class Creator {
     }
 
     /**
+     * 取最大公约数函数
+     * @param m 分子
+     * @param n 分母
+     * @return 最大公约数
+     */
+    private int getGreatestCommonDivisor(int m ,int n){
+        if(n == 0){
+            return m;
+        }
+        return getGreatestCommonDivisor(n,m%n);
+    }
+
+    /**
+     * 约分函数
+     * @param str 需要约分的分数
+     * @return  约分完后的分数
+     */
+    private String reduction(String str){
+        if (getType(str)==3){
+            String[] s = str.split("['/]");
+            int m = Integer.valueOf(s[1]);
+            int n = Integer.valueOf(s[2]);
+            int gcd = getGreatestCommonDivisor(m,n);
+            String m1 = String.valueOf(m/gcd);
+            String n1 = String.valueOf(n/gcd);
+            String result = s[0] + "'" + m1 + "/" + n1;
+            return result;
+        }
+        else if (getType(str)==2){
+            String[] s = str.split("[/]");
+            int m = Integer.valueOf(s[0]);
+            int n = Integer.valueOf(s[1]);
+            int gcd = getGreatestCommonDivisor(m,n);
+            String m1 = String.valueOf(m/gcd);
+            String n1 = String.valueOf(n/gcd);
+            String result = m1 + "/" + n1;
+            return result;
+        }
+        else {
+            return str;
+        }
+    }
+
+    /**
      * 加法函数
      *
      * @param num1 加数1

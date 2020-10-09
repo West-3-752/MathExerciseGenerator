@@ -164,6 +164,9 @@ public class Creator {
             String m1 = String.valueOf(m / gcd);
             String n1 = String.valueOf(n / gcd);
             if (Integer.parseInt(m1) > Integer.parseInt(n1)) {
+                if (Integer.parseInt(m1) % Integer.parseInt(n1) == 0) {
+                    return String.valueOf(Integer.parseInt(m1) / Integer.parseInt(n1));
+                }
                 return String.valueOf(Integer.parseInt(m1) / Integer.parseInt(n1)) + "'"
                         + String.valueOf(Integer.parseInt(m1) % Integer.parseInt(n1)) + "/" + n1;
             }
@@ -557,7 +560,7 @@ public class Creator {
                         break;
                     case TRUE_SCORE:
                         integer = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1)) * Integer.parseInt(num2);
+                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
                         denominator1 = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")))
                                 + integer * molecular1;
                         denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
@@ -567,11 +570,11 @@ public class Creator {
                         break;
                     case GREATER_TRUE_SCORE:
                         integer1 = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1)) * Integer.parseInt(num2);
+                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
                         denominator1 = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")))
                                 + integer1 * molecular1;
                         integer2 = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1)) * Integer.parseInt(num2);
+                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
                         denominator2 = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")))
                                 + integer2 * molecular2;
                         ans = String.valueOf(denominator1 * molecular2) + "/"

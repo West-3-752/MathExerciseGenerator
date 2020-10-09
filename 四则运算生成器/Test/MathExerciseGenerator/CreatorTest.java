@@ -5,8 +5,7 @@ import java.util.Random;
 public class CreatorTest {
 
     public static void main(String[] args) {
-
-        System.out.println(plusNum("2/3", "1/2"));
+        System.out.println(reduction("44/16"));
     }
 
     private static final int GREATER_TRUE_SCORE = 3;
@@ -26,79 +25,45 @@ public class CreatorTest {
         return INTEGER;
     }
 
-    private static String plusNum(String num1, String num2) {
-        String ans = "";
-        String e;
-        int type1 = getType(num1);
-        int type2 = getType(num2);
-        if (type1 < type2) {
-            type1 = type1 + type2;
-            type2 = type1 - type2;
-            type1 = type1 - type2;
-            e = num1;
-            num1 = num2;
-            num2 = e;
+
+    private static int getGreatestCommonDivisor(int m ,int n){
+        if(n == 0){
+            return m;
         }
-        if (type1 == type2) {
-            switch (type1) {
-                case INTEGER:
-                    ans = String.valueOf((Integer.parseInt(num1) + Integer.parseInt(num2)));
-                    break;
-                case GREATER_TRUE_SCORE:
-                    ans = String.valueOf(Integer.parseInt(num1.substring(0, num1.indexOf("'"))) +
-                            Integer.parseInt(num2.substring(0, num2.indexOf("'")))) + "'";
-                    num1 = num1.substring(num1.indexOf("'") + 1);
-                    num2 = num2.substring(num2.indexOf("'") + 1);
-                case TRUE_SCORE:
-                    int molecular; //分母
-                    int denominator; //分子
-                    int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                    int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                    molecular = i * j;
-                    ans = plusTrueScore(num1, num2, ans, molecular, i, j);
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            if (type1 == GREATER_TRUE_SCORE && type2 == TRUE_SCORE) {
-                ans = num1.substring(0, num1.indexOf("'") + 1);
-                num1 = num1.substring(num1.indexOf("'") + 1);
-                int molecular; //分母
-                int denominator; //分子
-                int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                molecular = i * j;
-                ans = plusTrueScore(num1, num2, ans, molecular, i, j);
-            } else if (type1 == GREATER_TRUE_SCORE && type2 == INTEGER) {
-                ans = String.valueOf(Integer.parseInt(num1.substring(0, num1.indexOf("'"))) + num2) +
-                        num1.substring(num1.indexOf("'"));
-            } else {
-                ans = String.valueOf(num2) + "'" + num1;
-            }
-        }
-        return ans;
+        return getGreatestCommonDivisor(n,m%n);
     }
 
-    private static String plusTrueScore(String num1, String num2, String ans, int molecular, int i, int j) {
-        int denominator;
-        denominator = Integer.parseInt(num1.substring(0, num1.indexOf("/"))) * j
-                + Integer.parseInt(num2.substring(0, num2.indexOf("/"))) * i;
-        if (denominator > molecular && "".equals(ans)) {
-            denominator -= molecular;
-            ans = ans + "1'";
-        } else if (denominator > molecular) {
-            denominator -= molecular;
-            ans = String.valueOf(Integer.parseInt(ans.substring(0, ans.indexOf("'"))) + 1) + "'";
+    /**
+     * 约分函数
+     * @param str 需要约分的分数
+     * @return  约分完后的分数
+     */
+    private static String reduction(String str){
+        if (getType(str)==GREATER_TRUE_SCORE){
+            String[] s = str.split("['/]");
+            int m = Integer.parseInt(s[1]);
+            int n = Integer.parseInt(s[2]);
+            int gcd = getGreatestCommonDivisor(m,n);
+            String m1 = String.valueOf(m/gcd);
+            String n1 = String.valueOf(n/gcd);
+            return s[0] + "'" + m1 + "/" + n1;
         }
-        int cause = 1;
-        for (int k = 1; k <= denominator; k++) {
-            if (denominator % k == 0 && molecular % k == 0) {
-                cause = k;
+        else if (getType(str)==TRUE_SCORE){
+            String[] s = str.split("[/]");
+            int m = Integer.parseInt(s[0]);
+            int n = Integer.parseInt(s[1]);
+            int gcd = getGreatestCommonDivisor(m,n);
+            String m1 = String.valueOf(m/gcd);
+            String n1 = String.valueOf(n/gcd);
+            if (Integer.parseInt(m1) > Integer.parseInt(n1)) {
+                return String.valueOf(Integer.parseInt(m1) / Integer.parseInt(n1)) + "'"
+                        + String.valueOf(Integer.parseInt(m1) % Integer.parseInt(n1)) + "/" + n1;
             }
+            return m1 + "/" + n1;
         }
-        ans = ans + String.valueOf(denominator / cause) + '/' + String.valueOf(molecular / cause);
-        return ans;
+        else {
+            return str;
+        }
     }
 
 }

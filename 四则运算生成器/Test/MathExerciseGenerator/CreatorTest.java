@@ -7,6 +7,7 @@ public class CreatorTest {
     public static void main(String[] args) {
 
         System.out.println(plusNum("2/3", "1/2"));
+        System.out.println("shabi");
     }
 
     private static final int GREATER_TRUE_SCORE = 3;

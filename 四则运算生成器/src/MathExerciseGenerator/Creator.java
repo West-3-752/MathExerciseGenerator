@@ -22,13 +22,150 @@ public class Creator {
     public String[][] createExercise(int n, int r) {
 
         String[][] exerciseArray = new String[n][2];
+        String[][] exerciseCheckingArray = new String[n][4];
+        String[] checkingArray = new String[4];
+        StringBuilder exercise;
+        String part = "";
+        String ans = "-1";
+        String num1;
+        String num2;
+        double type = 0;
+        Boolean repeat = false;
 
         for (int i = 0; i < n; i++) {
-
+            do {
+                num1 = getNum(r);
+                ans = "-1";
+                exercise = new StringBuilder(num1);
+                for (int j = 0; j < 3; j++) {
+                    do {
+                        type = Math.random();
+                        num2 = getNum(r);
+                        if (type < 0.25) {
+                            part = num1 + " + " + num2;
+                            ans = plusNum(num1, num2);
+                        } else if (type < 0.5) {
+                            part = num1 + " - " + num2;
+                            ans = minusNum(num1, num2);
+                        } else if (type < 0.75) {
+                            while ("1".equals(num2)) {
+                                num2 = getNum(r);
+                            }
+                            part = num1 + " * " + num2;
+                            ans = multiplyNum(num1, num2);
+                        } else {
+                            while ("1".equals(num2)) {
+                                num2 = getNum(r);
+                            }
+                            part = num1 + " / " + num2;
+                            ans = divideNum(num1, num2);
+                        }
+                    } while (!ifPositive(ans));
+                    if (type >= 0.5 && (exercise.toString().contains("+") || exercise.toString().contains("-"))
+                            && (!exercise.toString().contains("*") || !exercise.toString().contains("/"))) {
+                        exercise = new StringBuilder("( " + exercise + " )");
+                    }
+                    checkingArray[j] = num1;
+                    num1 = ans;
+                    exercise = new StringBuilder(exercise + part.substring(part.indexOf(" ")));
+                }
+                exerciseArray[i][0] = exercise.toString();
+                exerciseArray[i][1] = ans;
+                checkingArray[3] = ans;
+                sortArray(checkingArray);
+                if (i != 0) {
+                    repeat = ifRepeat(checkingArray, exerciseCheckingArray, i);
+                }
+                if (!repeat) {
+                    exerciseCheckingArray[i][0] = checkingArray[0];
+                    exerciseCheckingArray[i][1] = checkingArray[1];
+                    exerciseCheckingArray[i][2] = checkingArray[2];
+                    exerciseCheckingArray[i][3] = checkingArray[3];
+                }
+            } while (repeat);
         }
-
         return exerciseArray;
     }
+
+    private void sortArray(String[] array) {
+        String num1 = array[0];
+        String num2 = array[1];
+        String num3 = array[2];
+        if (ifBigger(num1, num2)) {
+            if (ifBigger(num1, num3)) {
+                if (ifBigger(num3, num2)) {
+                    array[2] = num3;
+                    array[3] = num2;
+                }
+            } else {
+                array[0] = num3;
+                array[1] = num1;
+                array[2] = num2;
+            }
+        } else {
+            if (ifBigger(num2, num3)) {
+                array[0] = num2;
+                if (ifBigger(num1, num3)) {
+                    array[1] = num1;
+                    array[2] = num3;
+                } else {
+                    array[1] = num3;
+                    array[2] = num1;
+                }
+            } else {
+                array[0] = num3;
+                array[1] = num2;
+                array[2] = num1;
+            }
+        }
+    }
+
+    private Boolean ifBigger(String num1, String num2) {
+        num1 = toTrueScore(num1);
+        num2 = toTrueScore(num2);
+        int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
+        int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
+        int denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
+        int molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
+        return denominator1 * molecular2 >= denominator2 * molecular1;
+    }
+
+    private Boolean ifRepeat(String[] checkingArray, String[][] exerciseCheckingArray, int num) {
+        for (int i = 0; i < num; i++) {
+            if (checkingArray[3].equals(exerciseCheckingArray[i][3])
+                    && checkingArray[2].equals(exerciseCheckingArray[i][2])
+                    && checkingArray[1].equals(exerciseCheckingArray[i][1])
+                    && checkingArray[0].equals(exerciseCheckingArray[i][0])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean ifPositive(String ans) {
+        int type = getType(ans);
+        switch (type) {
+            case INTEGER:
+                if (Integer.parseInt(ans) < 0) {
+                    return false;
+                }
+                break;
+            case TRUE_SCORE:
+                if (Integer.parseInt(ans.substring(0, ans.indexOf("/"))) < 0) {
+                    return false;
+                }
+                break;
+            case GREATER_TRUE_SCORE:
+                if (Integer.parseInt(ans.substring(0, ans.indexOf("'"))) < 0) {
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
 
     /**
      * 查询答案是否正确函数
@@ -40,22 +177,6 @@ public class Creator {
         Boolean[] grade = new Boolean[exerciseArray.length];
 
         return grade;
-    }
-
-    /**
-     * @param exerciseArray 储存题目数组
-     * @param pos           储存题目的位置
-     * @param maxNum        题目中的最大数值
-     * @return exerciseArray 增加题目后的数组
-     */
-    private String[][] getOneExercise(String[][] exerciseArray, int pos, int maxNum) {
-        String exercise = getNum(maxNum);
-        int maxSymbolNum = 3;
-        for (int j = 0; j <= new Random(maxSymbolNum).nextInt(); j++) {
-
-        }
-
-        return exerciseArray;
     }
 
     /**
@@ -72,38 +193,21 @@ public class Creator {
         int denominator;
         int molecular;
         if (type > 0.5) {
-            topic = String.valueOf(random.nextInt(maxNum));
+            topic = String.valueOf(random.nextInt(maxNum - 1) + 1);
         } else if (type > 0.8) {
-            denominator = random.nextInt(maxNum);
-            molecular = random.nextInt(denominator);
+            denominator = random.nextInt(maxNum - 1) + 1;
+            molecular = random.nextInt(denominator - 1) + 1;
             topic = String.valueOf(molecular) + '/' + String.valueOf(denominator);
         } else {
-            denominator = random.nextInt(maxNum);
-            molecular = random.nextInt(denominator);
-            topic = random.nextInt(maxNum) + "'" + String.valueOf(molecular) + '/' + String.valueOf(denominator);
+            denominator = random.nextInt(maxNum - 1) + 1;
+            while (denominator == 1) {
+                denominator = random.nextInt(maxNum - 1) + 1;
+            }
+            molecular = random.nextInt(denominator - 1) + 1;
+            topic = String.valueOf(random.nextInt(maxNum - 1) + 1) + "'" + String.valueOf(molecular)
+                    + '/' + String.valueOf(denominator);
         }
         return topic;
-    }
-
-    private String getAns(String exercise) {
-        String num1 = "";
-        String num2 = "";
-        String symbol = "";
-        for (int i = 0; i < exercise.length(); i++) {
-            if (exercise.charAt(i) == ' ' || exercise.charAt(i) == '=') {
-                if ("".equals(symbol)) {
-                    symbol = String.valueOf(exercise.charAt(++i));
-                    num2 = num1;
-                    num1 = "";
-                    i++;
-                } else {
-
-                }
-            } else {
-                num1 = num1 + String.valueOf(exercise.charAt(i));
-            }
-        }
-        return num2;
     }
 
     /**
@@ -155,11 +259,17 @@ public class Creator {
             int gcd = getGreatestCommonDivisor(m, n);
             String m1 = String.valueOf(m / gcd);
             String n1 = String.valueOf(n / gcd);
+            if (Integer.parseInt(m1) == 0) {
+                return s[0];
+            } else if (Integer.parseInt(m1) > Integer.parseInt(n1)) {
+                int integer = Integer.parseInt(s[0]) + Integer.parseInt(m1) / Integer.parseInt(n1);
+                return String.valueOf(integer) + "'" + String.valueOf(Integer.parseInt(m1) % Integer.parseInt(n1)) + "/"
+                        + n1;
+            }
             return s[0] + "'" + m1 + "/" + n1;
         } else if (getType(str) == TRUE_SCORE) {
-            String[] s = str.split("[/]");
-            int m = Integer.parseInt(s[0]);
-            int n = Integer.parseInt(s[1]);
+            int m = Integer.parseInt(str.substring(0, str.indexOf("/")));
+            int n = Integer.parseInt(str.substring(str.indexOf("/") + 1));
             int gcd = getGreatestCommonDivisor(m, n);
             String m1 = String.valueOf(m / gcd);
             String n1 = String.valueOf(n / gcd);
@@ -184,78 +294,15 @@ public class Creator {
      * @return ans 结果
      */
     private String plusNum(String num1, String num2) {
-        String ans = "";
-        String e;
-        int type1 = getType(num1);
-        int type2 = getType(num2);
-        if (type1 < type2) {
-            type1 = type1 + type2;
-            type2 = type1 - type2;
-            type1 = type1 - type2;
-            e = num1;
-            num1 = num2;
-            num2 = e;
-        }
-        if (type1 == type2) {
-            switch (type1) {
-                case INTEGER:
-                    ans = String.valueOf((Integer.parseInt(num1) + Integer.parseInt(num2)));
-                    break;
-                case GREATER_TRUE_SCORE:
-                    ans = String.valueOf(Integer.parseInt(num1.substring(0, num1.indexOf("'"))) +
-                            Integer.parseInt(num2.substring(0, num2.indexOf("'")))) + "'";
-                    num1 = num1.substring(num1.indexOf("'") + 1);
-                    num2 = num2.substring(num2.indexOf("'") + 1);
-                case TRUE_SCORE:
-                    int molecular; //分母
-                    int denominator; //分子
-                    int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                    int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                    molecular = i * j;
-                    ans = plusTrueScore(num1, num2, ans, molecular, i, j);
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            if (type1 == GREATER_TRUE_SCORE && type2 == TRUE_SCORE) {
-                ans = num1.substring(0, num1.indexOf("'") + 1);
-                num1 = num1.substring(num1.indexOf("'") + 1);
-                int molecular; //分母
-                int denominator; //分子
-                int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                molecular = i * j;
-                ans = plusTrueScore(num1, num2, ans, molecular, i, j);
-            } else if (type1 == GREATER_TRUE_SCORE && type2 == INTEGER) {
-                ans = String.valueOf(Integer.parseInt(num1.substring(0, num1.indexOf("'"))) + num2) +
-                        num1.substring(num1.indexOf("'"));
-            } else {
-                ans = String.valueOf(num2) + "'" + num1;
-            }
-        }
-        return ans;
-    }
-
-    private String plusTrueScore(String num1, String num2, String ans, int molecular, int i, int j) {
-        int denominator;
-        denominator = Integer.parseInt(num1.substring(0, num1.indexOf("/"))) * j
-                + Integer.parseInt(num2.substring(0, num2.indexOf("/"))) * i;
-        if (denominator > molecular && "".equals(ans)) {
-            denominator -= molecular;
-            ans = ans + "1'";
-        } else if (denominator > molecular) {
-            denominator -= molecular;
-            ans = String.valueOf(Integer.parseInt(ans.substring(0, ans.indexOf("'"))) + 1) + "'";
-        }
-        int cause = 1;
-        for (int k = 1; k <= denominator; k++) {
-            if (denominator % k == 0 && molecular % k == 0) {
-                cause = k;
-            }
-        }
-        ans = ans + String.valueOf(denominator / cause) + '/' + String.valueOf(molecular / cause);
-        return ans;
+        num1 = toTrueScore(num1);
+        num2 = toTrueScore(num2);
+        int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
+        int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
+        int denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
+        int molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
+        int molecular = molecular1 * molecular2;
+        return reduction(String.valueOf(denominator1 * molecular2 + denominator2 * molecular1)
+                + "/" + String.valueOf(molecular));
     }
 
     /**
@@ -267,125 +314,15 @@ public class Creator {
      */
     private String minusNum(String num1, String num2) {
         String ans = "";
-        int type1 = getType(num1);
-        int type2 = getType(num2);
-        int molecular; //分母
-        int denominator; //分子
-        switch (type1) {
-            case INTEGER:
-                switch (type2) {
-                    case INTEGER:
-                        if (Integer.parseInt(num1) - Integer.parseInt(num2) < 0) return "-1";
-                        ans = String.valueOf(Integer.parseInt(num1) - Integer.parseInt(num2));
-                        break;
-                    case TRUE_SCORE:
-                        if (Integer.parseInt(num1) > 1) {
-                            ans = String.valueOf(Integer.parseInt(num1) - 1) + "'";
-                        }
-                        denominator = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = ans + String.valueOf((molecular - denominator)) + "/" + String.valueOf(molecular);
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        int integer = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        if (integer >= Integer.parseInt(num1)) {
-                            return "-1";
-                        } else if (integer + 1 == Integer.parseInt(num1)) {
-                            ans = num2.substring(num2.indexOf("'") + 1);
-                        } else {
-                            ans = String.valueOf(Integer.parseInt(num1) - integer - 1) + "'"
-                                    + num2.substring(num2.indexOf("'") + 1);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case TRUE_SCORE:
-                switch (type2) {
-                    case INTEGER:
-                    case GREATER_TRUE_SCORE:
-                        return "-1";
-                    case TRUE_SCORE:
-                        int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                        int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        denominator = Integer.parseInt(num1.substring(0, num1.indexOf("/"))) * j
-                                - Integer.parseInt(num2.substring(0, num2.indexOf("/"))) * i;
-                        if (denominator < 0) {
-                            return "-1";
-                        }
-                        ans = String.valueOf(denominator) + "/" + String.valueOf(i * j);
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case GREATER_TRUE_SCORE:
-                int i = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                int j = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                switch (type2) {
-                    case INTEGER:
-                        int integer = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        if (integer < Integer.parseInt(num2)) {
-                            return "-1";
-                        } else if (integer == Integer.parseInt(num2)) {
-                            ans = num1.substring(num1.indexOf("'") + 1);
-                        } else {
-                            ans = String.valueOf(integer - Integer.parseInt(num2)) + num1.substring(num1.indexOf("'"));
-                        }
-                        break;
-                    case TRUE_SCORE:
-                        denominator = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/"))) * j
-                                - Integer.parseInt(num2.substring(0, num2.indexOf("/"))) * i;
-                        if (denominator < 0) {
-                            if (Integer.parseInt(num1.substring(0, num1.indexOf("'"))) == 1) {
-                                ans = String.valueOf(i * j + denominator) + "/" + String.valueOf(i * j);
-                            } else {
-                                ans = String.valueOf(Integer.parseInt(num1.substring(0, num1.indexOf("'"))) - 1)
-                                        + "'" + String.valueOf(i * j + denominator) + "/" + String.valueOf(i * j);
-                            }
-                        } else if (denominator == 0) {
-                            ans = num1.substring(0, num1.indexOf("'"));
-                        } else {
-                            ans = num1.substring(0, num1.indexOf("'") + 1)
-                                    + String.valueOf(denominator) + "/" + String.valueOf(i * j);
-                        }
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        int integer1 = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        int integer2 = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        denominator = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/"))) * j
-                                - Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/"))) * i;
-                        if (integer2 > integer1) {
-                            return "-1";
-                        } else if (integer2 == integer1) {
-                            if (denominator < 0) {
-                                return "-1";
-                            } else if (denominator == 0) {
-                                return "0";
-                            }
-                            ans = String.valueOf(denominator) + "/" + String.valueOf(i * j);
-                        } else if (denominator == 0) {
-                            ans = String.valueOf(integer1 - integer2);
-                        } else {
-                            if (denominator < 0) {
-                                denominator = i * j + denominator;
-                                if (integer1 != integer2 + 1) {
-                                    ans = String.valueOf(integer1 - integer2 - 1) + "'";
-                                }
-                            } else {
-                                ans = String.valueOf(integer1 - integer2) + "'";
-                            }
-                            ans = ans + String.valueOf(denominator) + "/" + String.valueOf(i * j);
-                        }
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-        return ans;
+        num1 = toTrueScore(num1);
+        num2 = toTrueScore(num2);
+        int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
+        int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
+        int denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
+        int molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
+        int molecular = molecular1 * molecular2;
+        return reduction(String.valueOf(denominator1 * molecular2 - denominator2 * molecular1)
+                + "/" + String.valueOf(molecular));
     }
 
     /**
@@ -396,198 +333,47 @@ public class Creator {
      * @return ans 结果
      */
     private String multiplyNum(String num1, String num2) {
-        String ans = "";
-        int type1 = getType(num1);
-        int type2 = getType(num2);
-        int molecular; //分母
-        int denominator; //分子
-        int integer;
-        String e;
-        if (type2 < type1) {
-            type1 = type1 + type2;
-            type2 = type1 - type2;
-            type1 = type1 - type2;
-            e = num1;
-            num1 = num2;
-            num2 = e;
-        }
-        switch (type1) {
-            case INTEGER:
-                switch (type2) {
-                    case INTEGER:
-                        ans = String.valueOf(Integer.parseInt(num1) * Integer.parseInt(num2));
-                        break;
-                    case TRUE_SCORE:
-                        denominator = Integer.parseInt(num2.substring(0, num2.indexOf("/"))) * Integer.parseInt(num1);
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        if (denominator > molecular) {
-                            ans = "1'" + String.valueOf(denominator - molecular) + num2.substring(num2.indexOf("/"));
-                        }
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        integer = Integer.parseInt(num2.substring(0, num2.indexOf("'"))) * Integer.parseInt(num1);
-                        denominator = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")))
-                                * Integer.parseInt(num1);
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        if (denominator > molecular) {
-                            ans = String.valueOf(integer + 1) + "'" + String.valueOf(denominator - molecular) + "/"
-                                    + String.valueOf(molecular);
-                        } else {
-                            ans = String.valueOf(integer) + "'" + String.valueOf(denominator) + "/"
-                                    + String.valueOf(molecular);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case TRUE_SCORE:
-                int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
-                int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                int denominator2;
-                int molecular2;
-                switch (type2) {
-                    case TRUE_SCORE:
-                        denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = String.valueOf(denominator1 * denominator2) + "/"
-                                + String.valueOf(molecular1 * molecular2);
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        denominator2 = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        denominator2 += Integer.parseInt(num2.substring(0, num2.indexOf("'"))) * molecular2;
-                        integer = (denominator2 * denominator1) / (molecular1 * molecular2);
-                        denominator = (denominator2 * denominator1) % (molecular1 * molecular2);
-                        ans = String.valueOf(integer) + "'" + String.valueOf(denominator) + "/"
-                                + String.valueOf(denominator1 * denominator2);
-                    default:
-                        break;
-                }
-                break;
-            case GREATER_TRUE_SCORE:
-                int integer1 = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                int integer2 = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                denominator1 = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")));
-                molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                denominator2 = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")));
-                molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                denominator1 += integer1 * molecular1;
-                denominator2 += integer2 * molecular2;
-                integer = (denominator2 * denominator1) / (molecular1 * molecular2);
-                denominator = (denominator2 * denominator1) % (molecular1 * molecular2);
-                ans = String.valueOf(integer) + "'" + String.valueOf(denominator) + "/"
-                        + String.valueOf(denominator1 * denominator2);
-                break;
-            default:
-                break;
-        }
-        return ans;
+        num1 = toTrueScore(num1);
+        num2 = toTrueScore(num2);
+        int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
+        int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
+        int denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
+        int molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
+        return reduction(String.valueOf(denominator1 * denominator2)
+                + "/" + String.valueOf(molecular2 * molecular1));
     }
 
     private String divideNum(String num1, String num2) {
-        String ans = "";
-        int type1 = getType(num1);
-        int type2 = getType(num2);
-        int molecular; //分母
-        int denominator; //分子
-        int molecular1;
-        int denominator1;
-        int molecular2;
-        int denominator2;
-        int integer;
-        int integer1;
-        int integer2;
-        switch (type1) {
-            case INTEGER:
-                switch (type2) {
-                    case INTEGER:
-                        ans = num1 + "/" + num2;
-                        break;
-                    case TRUE_SCORE:
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = String.valueOf(molecular * Integer.parseInt(num1)) + "/"
-                                + num2.substring(0, num2.indexOf("/"));
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        integer = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        denominator = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")))
-                                * integer;
-                        ans = String.valueOf(molecular * Integer.parseInt(num1)) + "/"
-                                + num2.substring(0, num2.indexOf("/"));
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case TRUE_SCORE:
-                switch (type2) {
-                    case INTEGER:
-                        denominator = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
-                        molecular = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = String.valueOf(denominator) + "/" + String.valueOf(molecular * Integer.parseInt(num2));
-                        break;
-                    case TRUE_SCORE:
-                        denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                        denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = String.valueOf(denominator1 * molecular2) + "/"
-                                + String.valueOf(molecular1 * denominator2);
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        integer = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        denominator2 = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")))
-                                + integer * molecular2;
-                        ans = String.valueOf(denominator1 * molecular2) + "/"
-                                + String.valueOf(molecular1 * denominator2);
-                        break;
-                    default:
-                        break;
-                }
-            case GREATER_TRUE_SCORE:
-                switch (type2){
-                    case INTEGER:
-                        integer = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        molecular = Integer.parseInt(num1.substring(num1.indexOf("/") + 1)) * Integer.parseInt(num2);
-                        denominator = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")))
-                                + integer * molecular;
-                        ans = String.valueOf(denominator) + "/" + String.valueOf(molecular);
-                        break;
-                    case TRUE_SCORE:
-                        integer = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                        denominator1 = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")))
-                                + integer * molecular1;
-                        denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        ans = String.valueOf(denominator1 * molecular2) + "/"
-                                + String.valueOf(molecular1 * denominator2);
-                        break;
-                    case GREATER_TRUE_SCORE:
-                        integer1 = Integer.parseInt(num1.substring(0, num1.indexOf("'")));
-                        molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
-                        denominator1 = Integer.parseInt(num1.substring(num1.indexOf("'") + 1, num1.indexOf("/")))
-                                + integer1 * molecular1;
-                        integer2 = Integer.parseInt(num2.substring(0, num2.indexOf("'")));
-                        molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
-                        denominator2 = Integer.parseInt(num2.substring(num2.indexOf("'") + 1, num2.indexOf("/")))
-                                + integer2 * molecular2;
-                        ans = String.valueOf(denominator1 * molecular2) + "/"
-                                + String.valueOf(molecular1 * denominator2);
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
+        if (getType(num1) == INTEGER) {
+            if ("0".equals(num1)) {
+                return "-1";
+            }
         }
-        return reduction(ans);
+        num1 = toTrueScore(num1);
+        num2 = toTrueScore(num2);
+        int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
+        int molecular1 = Integer.parseInt(num1.substring(num1.indexOf("/") + 1));
+        int denominator2 = Integer.parseInt(num2.substring(0, num2.indexOf("/")));
+        int molecular2 = Integer.parseInt(num2.substring(num2.indexOf("/") + 1));
+        return reduction(String.valueOf(denominator1 * molecular2)
+                + "/" + String.valueOf(denominator2 * molecular1));
     }
 
+    private String toTrueScore(String num) {
+        int type = getType(num);
+        int molecular1; //分母
+        int denominator1; //分子
+        if (type == INTEGER) {
+            denominator1 = Integer.parseInt(num);
+            molecular1 = 1;
+        } else if (type == TRUE_SCORE) {
+            denominator1 = Integer.parseInt(num.substring(0, num.indexOf("/")));
+            molecular1 = Integer.parseInt(num.substring(num.indexOf("/") + 1));
+        } else {
+            molecular1 = Integer.parseInt(num.substring(num.indexOf("/") + 1));
+            denominator1 = Integer.parseInt(num.substring(num.indexOf("'") + 1, num.indexOf("/")))
+                    + Integer.parseInt(num.substring(0, num.indexOf("'"))) * molecular1;
+        }
+        return denominator1 + "/" + molecular1;
+    }
 }

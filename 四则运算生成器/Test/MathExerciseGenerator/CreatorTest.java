@@ -5,6 +5,7 @@ import java.util.Random;
 public class CreatorTest {
 
     public static void main(String[] args) {
+<<<<<<< HEAD
 
         System.out.println(plusNum("2/3", "1/2"));
         System.out.println("shabi");
@@ -97,9 +98,14 @@ public class CreatorTest {
             if (denominator % k == 0 && molecular % k == 0) {
                 cause = k;
             }
+=======
+        Creator creator = new Creator();
+        String[][] a = creator.createExercise(100, 10);
+        for (int i = 0; i < 100; i++) {
+            System.out.println(a[i][0]);
+            System.out.println(a[i][1]);
+>>>>>>> ecb2dcaa9998b951d7d4aefe2301d15c8059b2ec
         }
-        ans = ans + String.valueOf(denominator / cause) + '/' + String.valueOf(molecular / cause);
-        return ans;
     }
 
 }

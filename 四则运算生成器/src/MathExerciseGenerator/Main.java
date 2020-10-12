@@ -33,16 +33,6 @@ public class Main {
             readWriteTxt.writeTxt("D:\\1.txt", exercises[i][1]);
             readWriteTxt.writeTxt("D:\\1.txt", "\n");
         }
-        System.out.println("输入题目路径与答案路径判定对错并统计");
-        String path1 = scanner.nextLine();
-        String path2 = scanner.nextLine();
-        String[][] correctWrong = compareAnswer(path1, path2);
-        String correct = exchange(correctWrong[0]);
-        String wrong = exchange(correctWrong[1]);
-        readWriteTxt.createTxt("D:\\3.txt");
-        readWriteTxt.writeTxt("D:\\3.txt", "Correct：" + correctWrong[0].length + "（" + correct);
-        readWriteTxt.writeTxt("D:\\3.txt", "\n");
-        readWriteTxt.writeTxt("D:\\3.txt", "Wrong：" + correctWrong[1].length + "（" + wrong);
     }
 
     /**

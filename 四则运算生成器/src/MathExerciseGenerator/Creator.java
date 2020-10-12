@@ -238,7 +238,7 @@ public class Creator {
      * @param n 分母
      * @return 最大公约数
      */
-    private static int getGreatestCommonDivisor(int m, int n) {
+    static int getGreatestCommonDivisor(int m, int n) {
         if (n == 0) {
             return m;
         }
@@ -251,7 +251,7 @@ public class Creator {
      * @param str 需要约分的分数
      * @return 约分完后的分数
      */
-    private static String reduction(String str) {
+     static String reduction(String str) {
         if (getType(str) == GREATER_TRUE_SCORE) {
             String[] s = str.split("['/]");
             int m = Integer.parseInt(s[1]);
@@ -293,7 +293,7 @@ public class Creator {
      * @param num2 加数2
      * @return ans 结果
      */
-    private String plusNum(String num1, String num2) {
+    String plusNum(String num1, String num2) {
         num1 = toTrueScore(num1);
         num2 = toTrueScore(num2);
         int denominator1 = Integer.parseInt(num1.substring(0, num1.indexOf("/")));
